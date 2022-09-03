@@ -1,16 +1,23 @@
 import maya.cmds as mc
+import maya.api.OpenMaya as om
 import importlib
 
 from Kaia_SkinHelper import check
 importlib.reload(check)
 
-def getSkinNode(shape):
-    node = mc.listConnections(shape, t='skinCluster', d=False)
-    return node
-
-def getTransNode(shape):
-    obj = mc.listRelatives(shape, parent=True)[0]
-    return obj
+def getSkinNode(shape, debug=True):
+    nodes = mc.listHistory(shape, ac=True) #allConnections
+    try:
+        skinCluster = mc.ls(nodes, type='skinCluster')[0]
+        '''There might be driver joints that are bind to skinned curve,
+        which results multiple skinCluster in history.
+        Therefore we return the first Skincluster only'''
+    except:
+        if debug == True:
+            om.MGlobal.displayError('Object not skinned: %s'%shape)
+        return None
+    
+    return skinCluster
 
 def getSkinAttr(obj,node):
     if isinstance(node,list): node = node[0]
@@ -30,10 +37,13 @@ def bindSkin(objs, attr):
     for obj in objs:
         if check.existence(obj): continue
         if check.node_type(obj,'transform'): continue
-        if check.skinned(obj): continue            #already skinned
         
         mc.select(attr['jnts'],obj)
         mc.skinCluster(tsb=True, n=obj+'_skinClst',
                         mi=attr['maxi'], sm=attr['method']
                         )
+
+
 ###
+if __name__ == "__main__":
+    pass
