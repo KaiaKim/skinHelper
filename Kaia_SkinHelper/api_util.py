@@ -17,10 +17,7 @@ def get_parameters(SHAPENAME, SKINCLUSTER):
     
     # get components
     inf_dags = skin_cluster.influenceObjects()
-    inf_index = om.MIntArray()
-    for x in range(len(inf_dags)):
-        inf_index.append(int(skin_cluster.indexForInfluenceObject(inf_dags[x])))
-    
+
     # get influences
     component = om.MFnSingleIndexedComponent()
     vertex_comp = component.create(om.MFn.kMeshVertComponent)
@@ -29,34 +26,19 @@ def get_parameters(SHAPENAME, SKINCLUSTER):
     
     print('mesh_path:',mesh_path)
     print('vertex_comp:',vertex_comp)
-    print('inf_index:',inf_index)
     print('inf_dags:',inf_dags)
     print('skin_cluster:',skin_cluster)
-    return mesh_path, vertex_comp, inf_index, inf_dags, skin_cluster
+    return mesh_path, vertex_comp, inf_dags, skin_cluster
 
-def get_skin_weights(obj_name, shape_name, skinCluster_name):
-    # get skin weights
-    path, comp, infs, dags, sk = get_parameters(shape_name, skinCluster_name)
-    weightList = []
-    for inf in infs:
-        jointDag = dags[inf] #<OpenMaya.MDagPath object at 0x00000155D9581070>
-        joint = jointDag.getPath()
-
-
-        print('jointName:',joint)
+def get_skin_weights(path, comp, dags, sk):
+    outList = []
+    for i, dag in enumerate(dags):
+        joint = dag.getPath()
+        weight = sk.getWeights(path, comp, i)
         
-        weight = sk.getWeights(path, comp, inf)
-        dic = {'joint':joint,'weights':list(weight)}
-        weightList.append(dic)
+        outList.append( {'joint':joint,'weights':list(weight)} )
         
-    outData = {
-        'geo':obj_name,
-        'shape':shape_name,
-        'skinCluster':skinCluster_name,
-        'size':0,
-        'points':pointList,
-        'weights':weightList}
-    return outData
+
 
                     
 def set_skin_weights(node,weights):

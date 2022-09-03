@@ -77,13 +77,27 @@ class SkinHelper(ui.Main,ui.Handler):
         
         for obj in sel:
             shape = mc.listRelatives(obj,s=True)[0]
-            node = util.getSkinNode(shape)
-            dic = api_util.get_skin_weights(obj,shape,node)
+            skinCluster = util.getSkinNode(shape)
+            
+            path, comp, dags, sk = api_util.get_parameters(shape, skinCluster)
+            posList = []
+            weightList = api_util.get_skin_weights(path, comp, dags, sk)
+            
+            dic = {
+                'geo':obj,
+                'shape':shape,
+                'skinCluster':skinCluster,
+                'size':0,
+                'pos':posList,
+                'weights':weightList
+                }
+
             self.weightData.insert(0,dic)
         
         #write json files
         with open(self.dir+'/clipboard/weight.json', "w") as wfile:
             json.dump(self.weightData, wfile, indent=4)
+    
     
     def select_influence_joints(self,item):
         for dic in self.skinData:

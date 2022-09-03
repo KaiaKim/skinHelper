@@ -149,9 +149,24 @@ class Handler():
     
     def bc06(self,_):
         self.copy_weights_from_selected()
+        
+        #get item list
+        skinNodes = [v['skinCluster'] for v in self.weightData]
+        #update item list
+        mc.textScrollList(self.cBut2, e=1, ra=True)
+        mc.textScrollList(self.cBut2, e=1, append=skinNodes)
+        #select first item
+        if self.weightData != []:
+            mc.textScrollList(self.cBut2, e=1, selectIndexedItem=1)
 
     def bc07(self,_):
-        pass
+        self.emptyClipboard(flag=2)
+        
+        #update item list
+        mc.textScrollList(self.cBut2, e=1, ra=True)
+        
+        self.enableDisable()
+
     
     def bc08(self,_):
         pass
