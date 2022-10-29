@@ -1,4 +1,4 @@
-'''
+
 skinHelper
 Version 1.0.0
 Written by Kaia Kim
@@ -22,5 +22,4 @@ run02 = Kaia_SkinHelper.SkinHelper()
 6. Tutorial Video Link
 https://vimeo.com/765274550
 
-'''
 
