@@ -41,40 +41,30 @@ class Main():
         
         mc.text(l='\nClipboard',fn='boldLabelFont')
         
-        skinNodes = [v['node'] for v in self.skinData] #get item list
+        skinNodes = [v['skinCluster'] for v in self.skinData] #get item list
         self.cBut1 = mc.textScrollList( numberOfRows=8, allowMultiSelection=False,
 			append=skinNodes)
             
         mc.button(l='Empty Clipboard', c=self.bc02, bgc=red)
-        
-        self.sBut1 = mc.button(l='Select Influence Joints', c=self.bc03)
-        self.pBut1 = mc.button(l='Paste skin to selected', c=self.bc05)
-
-        mc.setParent('..') #tab 1
-            ###
-            ###
-        mc.columnLayout('Weights', adjustableColumn=True) #tab 2
-        
-        mc.text(l='Only skinCluster weights.')
-        mc.text(l='Use Individual Weights tab for deformer weights\n')
-        mc.button(l='Copy weights from selected', c=self.bc06, bgc=green)
-        
-        mc.text(l='\nClipboard',fn='boldLabelFont')
-        
-        weights = [v['geo'] for v in self.weightData] #get item list
-        self.cBut2 = mc.textScrollList( numberOfRows=8, allowMultiSelection=False,
-			append=weights)
-            
-        mc.button(l='Empty Clipboard', c=self.bc07, bgc=red)
+        '''
         radio1 = mc.radioButtonGrp( numberOfRadioButtons=2, l='Mapping Method: ', 
                                     labelArray2=['Index', 'Nearest'],
                                     sl=1, vr=True)
-        self.pBut2 = mc.button(l='Paste Weights to selected', c=self.bc08)
+        '''
+        
+        self.sBut1 = mc.button(l='Select Influence Joints', c=self.bc03)
+        self.pBut1 = mc.button(l='Paste skinCluster to selected', c=self.bc05)
 
-        mc.setParent('..') #tab 2
-            ###        
+        mc.text('\nThis tool has nothing to do with weights.\nUse \'Copy Skin Weights\' for that.')
+        '''
+        self.pBut2 = mc.button(l='Paste weights to selected', c=self.bc08)
+        '''
+
+        mc.setParent('..') #tab 1
+            ###      
             ###
-        mc.columnLayout('Individual Weights', adjustableColumn=True) #tab 3
+        '''
+        mc.columnLayout('Individual Weights', adjustableColumn=True) #tab 2
         
         mc.text(l='Use with Paint Skin Weights Tool,')
         mc.text(l='Paint Blend Shape Weights Tool,')
@@ -93,7 +83,8 @@ class Main():
                                     labelArray2=['Index', 'Nearest'],
                                     sl=1, vr=True)
         self.pBut3 = mc.button(l='Paste Weights to selected influence', c=self.bc11)
-        mc.setParent('..') #tab 3
+        mc.setParent('..') #tab 2
+        '''
             ###          
         mc.setParent('..') #second
         mc.setParent('..') #first
@@ -120,7 +111,7 @@ class Handler():
     def bc01(self,_):
         self.copy_skin_from_selected()
         #get item list
-        skinNodes = [v['node'] for v in self.skinData]
+        skinNodes = [v['skinCluster'] for v in self.skinData]
         #update item list
         mc.textScrollList(self.cBut1, e=1, ra=True)
         mc.textScrollList(self.cBut1, e=1, append=skinNodes)
@@ -132,7 +123,7 @@ class Handler():
         self.enableDisable()
     
     def bc02(self,_):
-        self.emptyClipboard(flag=1)
+        self.emptySkinData()
         
         #update item list
         mc.textScrollList(self.cBut1, e=1, ra=True)
@@ -146,28 +137,7 @@ class Handler():
     def bc05(self,_):
         item = mc.textScrollList(self.cBut1, q=1, selectItem=True)[0]
         self.paste_skin_to_selected(item)
-    
-    def bc06(self,_):
-        self.copy_weights_from_selected()
-        
-        #get item list
-        skinNodes = [v['skinCluster'] for v in self.weightData]
-        #update item list
-        mc.textScrollList(self.cBut2, e=1, ra=True)
-        mc.textScrollList(self.cBut2, e=1, append=skinNodes)
-        #select first item
-        if self.weightData != []:
-            mc.textScrollList(self.cBut2, e=1, selectIndexedItem=1)
 
-    def bc07(self,_):
-        self.emptyClipboard(flag=2)
-        
-        #update item list
-        mc.textScrollList(self.cBut2, e=1, ra=True)
-        
-        self.enableDisable()
-
-    
     def bc08(self,_):
         pass
     
@@ -180,7 +150,6 @@ class Handler():
     def bc11(self,_):
         pass
 
-            
     def enableDisable(self):
         if self.skinData != []:
             #enable buttons
@@ -192,18 +161,13 @@ class Handler():
             mc.button(self.pBut1, e=1, en=False, bgc=grey)
         else:
             print('invaild skin data')
-            
-        if self.weightData != []:
-            mc.button(self.pBut2, e=1, en=True, bgc=green)
-        elif self.weightData == []:
-            mc.button(self.pBut2, e=1, en=False, bgc=grey)
-        else:
-            print('invaild weight data')
-            
+
+        '''
         if self.indWeightData != []:
             mc.button(self.pBut3, e=1, en=True, bgc=green)
         elif self.indWeightData == []:
             mc.button(self.pBut3, e=1, en=False, bgc=grey)
         else:
             print('invaild individual weight data')
+        '''
 ###---------------------------------------------------------------------------

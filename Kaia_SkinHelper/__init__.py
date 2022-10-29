@@ -1,6 +1,5 @@
 import maya.cmds as mc
 import importlib
-import json
 
 from Kaia_SkinHelper import util
 importlib.reload(util)
@@ -24,16 +23,9 @@ class SkinHelper(ui.Main,ui.Handler):
         self.winName = 'kaiaSkinHelper' #node name
         
         self.skinData = []
-        self.weightData = []
         self.indWeightData = []
-        
-        #read json files
-        with open(self.dir + '/clipboard/skin.json', "r") as rfile:
-            self.skinData = json.load(rfile)
-        with open(self.dir + '/clipboard/weight.json', "r") as rfile:
-            self.weightData = json.load(rfile)
-        with open(self.dir + '/clipboard/indWeight.json', "r") as rfile:
-            self.indWeightData = json.load(rfile)
+
+        self.createWindow()
                         
     def rename_all_skinClst(self,suffix):
         shapes = mc.ls(shapes=True)
@@ -52,77 +44,56 @@ class SkinHelper(ui.Main,ui.Handler):
         
         for obj in sel:
             shape = mc.listRelatives(obj,s=True)[0]
-            node = util.getSkinNode(shape)
+            skinCluster = util.getSkinNode(shape)
             
-            if node != None:
-                dic = util.getSkinAttr(obj,node)
+            if skinCluster != None:
+                jnts, maxi, method = util.getSkinAttr(obj,skinCluster)
+                
+                #mesh_path, vertex_comp, inf_dags, fn_skinCluster = api_util.get_parameters(shape, skinCluster)
+                
+                #vert_count = mc.polyEvaluate(v=True)
+
+                #posList = api_util.get_vertex_pos(mesh_path, vertex_comp)
+                #weightList = api_util.get_skin_weights(mesh_path, vertex_comp, inf_dags, fn_skinCluster)
+                
+                dic = {
+                    'geo':obj,
+                    'shape':shape,
+                    'skinCluster':skinCluster,
+                    'jnts':jnts,
+                    'maxi':maxi,
+                    'method':method
+                    }
+                
                 self.skinData.insert(0,dic) #append to first
-            
-        #write json files
-        with open(self.dir+'/clipboard/skin.json', "w") as wfile:
-            json.dump(self.skinData, wfile)
-    
+
     
     def paste_skin_to_selected(self,item):
         sel = mc.ls(sl=True)
         
         for dic in self.skinData:
-            if dic['node']==item: 
+            if dic['skinCluster']==item: 
                 util.bindSkin(sel, dic)
         
         mc.select(sel)
-        
-    def copy_weights_from_selected(self):
-        sel = mc.ls(sl=True)
-        
-        for obj in sel:
-            shape = mc.listRelatives(obj,s=True)[0]
-            skinCluster = util.getSkinNode(shape)
-            
-            path, comp, dags, sk = api_util.get_parameters(shape, skinCluster)
-            posList = []
-            weightList = api_util.get_skin_weights(path, comp, dags, sk)
-            
-            dic = {
-                'geo':obj,
-                'shape':shape,
-                'skinCluster':skinCluster,
-                'size':0,
-                'pos':posList,
-                'weights':weightList
-                }
 
-            self.weightData.insert(0,dic)
-        
-        #write json files
-        with open(self.dir+'/clipboard/weight.json', "w") as wfile:
-            json.dump(self.weightData, wfile, indent=4)
-    
-    
     def select_influence_joints(self,item):
         for dic in self.skinData:
-            if dic['node']==item:
+            if dic['skinCluster']==item:
                 mc.select(dic['jnts'],add=True)
     
-    
-    def emptyClipboard(self,flag=0):
-        if flag == 1:
-            self.skinData = []
-            #write json files
-            with open(self.dir+'/clipboard/skin.json', "w") as wfile:
-                json.dump(self.skinData, wfile)
-        elif flag == 2:
-            self.weightData = []
-            with open(self.dir+'/clipboard/weight.json', "w") as wfile:
-                json.dump(self.weightData, wfile)
-        elif flag == 3:
-            self.indWeightData = []
-            with open(self.dir+'/clipboard/indWeight.json', "w") as wfile:
-                json.dump(self.indWeightData, wfile)
+    def emptySkinData(self):
+        self.skinData = []
         
+    def emptyIndWeightsData(self):
+            for data in self.indWeightData:
+                if isfile(data['filePath']):
+                    remove(data['filePath'])    
+            self.indWeightData = []
+            
 
 
 
 ###----------------------------------EXECUTE----------------------------------
-run01=SkinHelper()
-run01.createWindow()
+
+
