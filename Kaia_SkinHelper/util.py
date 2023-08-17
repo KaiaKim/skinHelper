@@ -1,5 +1,6 @@
 import maya.cmds as mc
 import maya.api.OpenMaya as om
+import maya.mel as mel
 import importlib
 
 from Kaia_SkinHelper import check
@@ -38,6 +39,14 @@ def bindSkin(objs, attr):
         mc.skinCluster(tsb=True, n=obj+'_skinClst',
                         mi=attr['maxi'], sm=attr['method']
                         )
+
+def copyWeights(objs, attr):
+    if isinstance(objs,str): objs = [objs]
+    for obj in objs:
+        mc.select(attr['geo'],obj)
+        mel.eval("copySkinWeights  -noMirror -surfaceAssociation closestPoint -influenceAssociation closestJoint;")
+        mc.select(clear=True)
+        
 
 
 ###

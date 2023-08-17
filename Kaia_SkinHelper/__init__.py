@@ -74,6 +74,7 @@ class SkinHelper(ui.Main,ui.Handler):
         for dic in self.skinData:
             if dic['skinCluster']==item: 
                 util.bindSkin(sel, dic)
+                util.copyWeights(sel, dic)
         
         mc.select(sel)
 
