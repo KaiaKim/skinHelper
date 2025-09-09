@@ -1,11 +1,14 @@
 import maya.cmds as mc
 import maya.api.OpenMaya as om
 import maya.api.OpenMayaAnim as oma
-#import re
+
 import importlib
 
 from Kaia_SkinHelper import check
-importlib.reload(check)
+try:
+    importlib.reload(check)
+except:
+    pass
 
 def get_parameters(SHAPENAME, SKINCLUSTER):
     # get shape

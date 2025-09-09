@@ -22,12 +22,9 @@ class Main():
         mc.window(self.winName, title=self.winTitle) #create a new window
         
         mc.scrollLayout( 'scorllLayout', width=275) #first
-        mc.tabLayout(innerMarginWidth=5, innerMarginHeight=5)#second
         
     
         ###
-        mc.columnLayout('skinCluster', adjustableColumn=True) #tab 1
-        
         mc.rowLayout(numberOfColumns=2)
         self.sufField = mc.textFieldGrp(l='Suffix:',tx='_skinClst',
                                 tcc=self.tcc1,
@@ -35,8 +32,17 @@ class Main():
                                 )
         self.sufBut = mc.button(l='Rename all skinCluster',c=self.bc00,bgc=blue)
         mc.setParent('..')
+
         mc.text(l='')
         mc.button(l='Copy skin from selected', c=self.bc01, bgc=green)
+
+        mc.rowLayout(numberOfColumns=2)
+        self.nodeField = mc.textFieldGrp(l='Node:',tx='',
+                                tcc=self.tcc1,
+                                cl2=('left','left'),cw2=(30,100)
+                                )
+        self.nodeBut = mc.button(l='Copy skin',c=self.bc06, bgc=green)
+        mc.setParent('..')
         
         
         mc.text(l='\nClipboard',fn='boldLabelFont')
@@ -55,38 +61,8 @@ class Main():
         self.sBut1 = mc.button(l='Select Influence Joints', c=self.bc03)
         self.pBut1 = mc.button(l='Paste skinCluster to selected', c=self.bc05)
 
-        mc.text('\nThis tool has nothing to do with weights.\nUse \'Copy Skin Weights\' for that.')
-        '''
-        self.pBut2 = mc.button(l='Paste weights to selected', c=self.bc08)
-        '''
 
-        mc.setParent('..') #tab 1
-            ###      
-            ###
-        '''
-        mc.columnLayout('Individual Weights', adjustableColumn=True) #tab 2
-        
-        mc.text(l='Use with Paint Skin Weights Tool,')
-        mc.text(l='Paint Blend Shape Weights Tool,')
-        mc.text(l='or Paint Attributes Tool')
-        
-        mc.button(l='Copy weights from selected influence', c=self.bc09, bgc=green)
-        
-        mc.text(l='\nClipboard',fn='boldLabelFont')
-        
-        indWeights = [v['name'] for v in self.indWeightData] #get item list
-        self.cBut3 = mc.textScrollList( numberOfRows=8, allowMultiSelection=False,
-			append=indWeights)
-            
-        mc.button(l='Empty Clipboard', c=self.bc10, bgc=red)
-        radio2 = mc.radioButtonGrp( numberOfRadioButtons=2, l='Mapping Method: ', 
-                                    labelArray2=['Index', 'Nearest'],
-                                    sl=1, vr=True)
-        self.pBut3 = mc.button(l='Paste Weights to selected influence', c=self.bc11)
-        mc.setParent('..') #tab 2
-        '''
             ###          
-        mc.setParent('..') #second
         mc.setParent('..') #first
 
         mc.showWindow()
@@ -117,8 +93,7 @@ class Handler():
         mc.textScrollList(self.cBut1, e=1, append=skinNodes)
         #select first item
         if self.skinData != []:
-            mc.textScrollList(self.cBut1, e=1, selectIndexedItem=1)
-        
+           mc.textScrollList(self.cBut1, e=1, selectIndexedItem=1)
         
         self.enableDisable()
     
@@ -138,17 +113,21 @@ class Handler():
         item = mc.textScrollList(self.cBut1, q=1, selectItem=True)[0]
         self.paste_skin_to_selected(item)
 
-    def bc08(self,_):
-        pass
+    def bc06(self,_):
+        skinCluster_node = mc.textFieldGrp(self.nodeField,q=True,tx=True)
+        self.copy_skin_from_node(skinCluster_node)
+
+        #get item list
+        skinNodes = [v['skinCluster'] for v in self.skinData]
+        #update item list
+        mc.textScrollList(self.cBut1, e=1, ra=True)
+        mc.textScrollList(self.cBut1, e=1, append=skinNodes)
+        #select first item
+        if self.skinData != []:
+           mc.textScrollList(self.cBut1, e=1, selectIndexedItem=1)
+        
+        self.enableDisable()
     
-    def bc09(self,_):
-        pass
-
-    def bc10(self,_):
-        pass    
-
-    def bc11(self,_):
-        pass
 
     def enableDisable(self):
         if self.skinData != []:

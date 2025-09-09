@@ -4,7 +4,12 @@ import maya.mel as mel
 import importlib
 
 from Kaia_SkinHelper import check
-importlib.reload(check)
+try:
+    importlib.reload(check)
+except:
+    pass
+
+
 
 def getSkinNode(shape, debug=True):
     nodes = mc.listHistory(shape, ac=True) #allConnections
@@ -20,6 +25,23 @@ def getSkinNode(shape, debug=True):
     
     return skinCluster
 
+def get_mesh_from_skincluster(skincluster):
+    if not mc.objExists(skincluster) or mc.nodeType(skincluster) != 'skinCluster':
+        print("Not a valid skinCluster node:"+skincluster)
+        return None, None
+
+    outputs = mc.listConnections(skincluster+".outputGeometry", source=False, destination=True) or []
+    shape_nodes = [node for node in outputs if mc.nodeType(node) == 'mesh']
+
+    if not shape_nodes:
+        print("No mesh shape connected to"+skincluster)
+        return skincluster.replace('_skinClst',''), None
+
+    shape = shape_nodes[0]
+    transform = mc.listRelatives(shape, parent=True, fullPath=True)[0]
+
+    return transform, shape
+
 def getSkinAttr(obj,node):
     if isinstance(node,list): node = node[0]
     jnts = mc.skinCluster(node, q=True, inf=True) #influence
@@ -34,7 +56,13 @@ def bindSkin(objs, attr):
         if check.existence(obj): continue
         if check.node_type(obj,'transform'): continue
         
-        mc.select(attr['jnts'],obj)
+        mc.select(obj)
+        for jnt in attr['jnts']:
+            try:
+                mc.select(jnt,add=True)
+            except:
+                print('error selecting joints:', jnt)
+        
         #// Error: ValueError: file C:/Users/user/Documents/maya/scripts\Kaia_SkinHelper\util.py line 37: Invalid path '<Kaia_SkinHelper.encode.NoIndent object at 0x0000019630C36548>'. //
         mc.skinCluster(tsb=True, n=obj+'_skinClst',
                         mi=attr['maxi'], sm=attr['method']
@@ -43,9 +71,12 @@ def bindSkin(objs, attr):
 def copyWeights(objs, attr):
     if isinstance(objs,str): objs = [objs]
     for obj in objs:
-        mc.select(attr['geo'],obj)
-        mel.eval("copySkinWeights  -noMirror -surfaceAssociation closestPoint -influenceAssociation closestJoint;")
-        mc.select(clear=True)
+        try:
+            mc.select(attr['geo'],obj)
+            mel.eval("copySkinWeights  -noMirror -surfaceAssociation closestPoint -influenceAssociation closestJoint;")
+            mc.select(clear=True)
+        except:
+            print('copy weights error:', obj)
         
 
 

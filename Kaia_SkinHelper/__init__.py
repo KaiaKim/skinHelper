@@ -2,13 +2,17 @@ import maya.cmds as mc
 import importlib
 
 from Kaia_SkinHelper import util
-importlib.reload(util)
 from Kaia_SkinHelper import api_util
-importlib.reload(api_util)
 from Kaia_SkinHelper import ui
-importlib.reload(ui)
 from Kaia_SkinHelper import check
-importlib.reload(check)
+
+try:
+    importlib.reload(util)
+    importlib.reload(api_util)
+    importlib.reload(ui)
+    importlib.reload(check)
+except:
+    pass
 
 ###--------------------------------CLASS--------------------------------------
 class SkinHelper(ui.Main,ui.Handler):
@@ -67,7 +71,23 @@ class SkinHelper(ui.Main,ui.Handler):
                 
                 self.skinData.insert(0,dic) #append to first
 
-    
+    def copy_skin_from_node(self, skinCluster):
+            obj, shape = util.get_mesh_from_skincluster(skinCluster)
+            
+            if skinCluster != None:
+                jnts, maxi, method = util.getSkinAttr(obj,skinCluster)
+                
+                dic = {
+                    'geo':obj,
+                    'shape':shape,
+                    'skinCluster':skinCluster,
+                    'jnts':jnts,
+                    'maxi':maxi,
+                    'method':method
+                    }
+                
+                self.skinData.insert(0,dic) #append to first
+
     def paste_skin_to_selected(self,item):
         sel = mc.ls(sl=True)
         
@@ -81,8 +101,12 @@ class SkinHelper(ui.Main,ui.Handler):
     def select_influence_joints(self,item):
         for dic in self.skinData:
             if dic['skinCluster']==item:
-                mc.select(dic['jnts'],add=True)
-    
+                for jnt in dic['jnts']:
+                    try:
+                        mc.select(jnt,add=True)
+                    except:
+                        print('error selecting joints:', jnt)
+                        
     def emptySkinData(self):
         self.skinData = []
         
